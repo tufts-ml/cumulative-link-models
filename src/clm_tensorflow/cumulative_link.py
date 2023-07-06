@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """The cumulative link distribution class."""
 
-# import tensorflow.keras.backend as K
+import warnings
+import numpy as np
+import tensorflow as tf
 from tensorflow_probability import distributions as tfd
 from tensorflow_probability import bijectors as tfb
 from tensorflow_probability.python.distributions import kullback_leibler
@@ -9,32 +11,16 @@ from tensorflow_probability import layers as tfpl
 from tensorflow_probability import math as tfp_math
 from tensorflow_probability import util
 from tensorflow_probability.python.internal import dtype_util, tensor_util, prefer_static, samplers, tensorshape_util
-import tensorflow as tf
-import warnings
-# from ..util.util import as_tuple
-# from tensorflow.keras.layers import Lambda, Dense
-import numpy as np
-# from ..third_party.convar import ConvolutionalAutoregressiveNetwork
-import tensorflow as tf
-
 from tensorflow_probability.python.distributions.ordered_logistic import _broadcast_cat_event_and_params
 
 
 class CumulativeLink(tfd.Distribution):
-    """Cumulative Link Distribution class.
-
-    TODO
-    ----
-    * Overload tfd.Distribution.param_shapes
-    * Overload tfd.Distribution.param_static_shapes?
-    """
-
     def __init__(
         self,
         cutpoints: tf.Tensor,
         loc: tf.Tensor,
         link: str = 'probit',
-        scale: tf.float = 1.,
+        scale: tf.float32 = 1.,
         dtype=tf.int32,
         validate_args: bool = False,
         allow_nan_stats: bool = True,
@@ -58,7 +44,7 @@ class CumulativeLink(tfd.Distribution):
             Desired link function to use to model the noise of the latent
             function, by default 'probit'. Must be be either `'probit'`
             or `'logit'`.
-        scale : `tf.float`, optional
+        scale : `tf.float32`, optional
             Desired scale (stddev) of the noise applied on the latent function, 
             by default `1`.
         dtype : optional
@@ -81,7 +67,7 @@ class CumulativeLink(tfd.Distribution):
 
         with tf.name_scope(name) as name:
 
-            # Cumulative Link specific parameters
+            # Cumulative link specific parameters
             float_dtype = dtype_util.common_dtype(
                 [cutpoints, loc, scale],
                 dtype_hint=tf.float32,
@@ -115,7 +101,7 @@ class CumulativeLink(tfd.Distribution):
         return dict(cutpoints=1, loc=0)
 
     @staticmethod
-    def _param_shapes(sample_shape, num_classes):
+    def _param_shapes(sample_shape, num_classes=None):
         """Shapes of class parameters depending on desired sample shape 
         and number of classes `C`."""
         return {
@@ -155,6 +141,10 @@ class CumulativeLink(tfd.Distribution):
         return tf.math.exp(self.ordinal_log_probs())
     
     def _z_values(self, eps=1e-8) -> tf.Tensor:
+        """`z` values used to compute CDFs for smoother likelihood.
+        
+        Replaces all occurances of `inf` with `1/eps` to avoide over/underflow issues.
+        """
         z = (self._augmented_cutpoints() - self.loc[..., tf.newaxis]) / self.scale
         z = tf.where(tf.math.is_inf(z), tf.sign(z) * (1/eps), z) # replace inf/-inf with very large or very small value
         return z
@@ -275,18 +265,50 @@ class CumulativeLink(tfd.Distribution):
 
     def _default_event_space_bijector(self):
         return
+    
+    @classmethod
+    def param_shapes(cls, sample_shape, num_classes, name='DistributionParamShapes'):
+        """Overloaded tfd.Distribution.param_shapes() method to support classes.
+        
+        See tfd.Distribition for more info.
+        """
+        with tf.name_scope(name):
+            return cls._param_shapes(sample_shape, num_classes)
 
-class CumulativeLink2(tfd.OrderedLogistic):
+    @classmethod
+    def param_static_shapes(cls, sample_shape, num_classes):
+        """Overloaded tfd.Distribution.param_static_shapes() method to support classes.
+        
+        See tfd.Distribition for more info.
+        """
+        if isinstance(sample_shape, tf.TensorShape):
+            if not tensorshape_util.is_fully_defined(sample_shape):
+                raise ValueError('TensorShape sample_shape must be fully defined')
+            sample_shape = tensorshape_util.as_list(sample_shape)
+
+        params = cls.param_shapes(sample_shape, num_classes)
+
+        static_params = {}
+        for name, shape in params.items():
+            static_shape = tf.get_static_value(shape)
+            if static_shape is None:
+                raise ValueError(
+                    'sample_shape must be a fully-defined TensorShape or list/tuple')
+            static_params[name] = tf.TensorShape(static_shape)
+
+        return static_params
+
+class SimpleCumulativeLink(tfd.OrderedLogistic):
     def __init__(
         self,
         cutpoints: tf.Tensor,
         loc: tf.Tensor,
         link: str = 'probit',
-        scale: tf.float = 1.,
+        scale: tf.float32 = 1.,
         dtype=tf.int32,
         validate_args: bool = False,
         allow_nan_stats: bool = True,
-        name: str = 'CumulativeLink',
+        name: str = 'SimpleCumulativeLink',
     ) -> None:
         with tf.name_scope(name) as name:
 
@@ -320,6 +342,10 @@ class CumulativeLink2(tfd.OrderedLogistic):
         return self._link
     
     def _z_values(self, eps=1e-8) -> tf.Tensor:
+        """`z` values used to compute CDFs for smoother likelihood.
+        
+        Replaces all occurances of `inf` with `1/eps` to avoide over/underflow issues.
+        """
         z = (self._augmented_cutpoints() - self.loc[..., tf.newaxis]) / self.scale
         z = tf.where(tf.math.is_inf(z), tf.sign(z) * (1/eps), z) # replace inf/-inf with very large or very small value
         return z
@@ -373,7 +399,7 @@ class CumulativeLink2(tfd.OrderedLogistic):
         return tf.reshape(log_prob_flat, shape=tf.shape(x))
     
     def _mean(self):
-        """Mean of distribution--treat as mode."""
+        """Mean of distribution--treated as mode."""
         return self._mode()
     
     @staticmethod
@@ -385,4 +411,36 @@ class CumulativeLink2(tfd.OrderedLogistic):
             'cutpoints' : tf.convert_to_tensor(num_classes-1),
             'scale': tf.convert_to_tensor(1),
             }
+    
+    @classmethod
+    def param_shapes(cls, sample_shape, num_classes, name='DistributionParamShapes'):
+        """Overloaded tfd.Distribution.param_shapes() method to support classes.
+        
+        See tfd.Distribition for more info.
+        """
+        with tf.name_scope(name):
+            return cls._param_shapes(sample_shape, num_classes)
+
+    @classmethod
+    def param_static_shapes(cls, sample_shape, num_classes):
+        """Overloaded tfd.Distribution.param_static_shapes() method to support classes.
+        
+        See tfd.Distribition for more info.
+        """
+        if isinstance(sample_shape, tf.TensorShape):
+            if not tensorshape_util.is_fully_defined(sample_shape):
+                raise ValueError('TensorShape sample_shape must be fully defined')
+            sample_shape = tensorshape_util.as_list(sample_shape)
+
+        params = cls.param_shapes(sample_shape, num_classes)
+
+        static_params = {}
+        for name, shape in params.items():
+            static_shape = tf.get_static_value(shape)
+            if static_shape is None:
+                raise ValueError(
+                    'sample_shape must be a fully-defined TensorShape or list/tuple')
+            static_params[name] = tf.TensorShape(static_shape)
+
+        return static_params
 
