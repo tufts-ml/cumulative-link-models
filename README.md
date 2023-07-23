@@ -1,4 +1,9 @@
 # Cumulative Link Models
+
+<p align=center>
+    <img src=res/clm_thumbnail.png height=400>
+</p>
+
 Code for cumulative link models for ordinal regression that support differentiable learning ala TensorFlow and sklearn.
 
 <blockquote>
@@ -13,7 +18,7 @@ Alexander A. Lobo, Preetish Rath, Micheal C. Hughes
 </p>
 </blockquote>
 
-To appear on [IMLH 2023](https://sites.google.com/view/imlh2023/home?authuser=1).
+To appear at [IMLH 2023](https://sites.google.com/view/imlh2023/home?authuser=1).
 
 ## Contents
 1. [Setup](#setup)
