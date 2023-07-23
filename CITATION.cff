@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Lobo"
+  given-names: "Alexander A."
+- family-names: "Rath"
+  given-names: "Preetish"
+- family-names: "Hughes"
+  given-names: "Michael C."
+title: "Cumulative Link Models"
+version: 1.0.0
+date-released: 2023-07-28
+url: "https://github.com/tufts-ml/cumulative-link-models/tree/main"
+preferred-citation:
+  type: inproceedings
+  authors:
+  - family-names: "Lobo"
+    given-names: "Alexander A."
+  - family-names: "Rath"
+    given-names: "Preetish"
+  - family-names: "Hughes"
+    given-names: "Michael C."
+  title: "Semi-supervised Ordinal Regression via Cumulative Link Models for Predicting In-Hospital Length-of-Stay"
+  booktitle: "Workshop on Interpretable ML in Healthcare at International Conference on Machine Learning (ICML)"
+  year: 2023
