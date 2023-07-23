@@ -45,7 +45,7 @@ of the diabetes.
 
 The [Diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from sklearn is used.
 
-The raw target attribute is a reak valuequantitative measure of the disease 
+The raw target attribute is a real value quantitative measure of the disease 
 progression one year after baseline. A `KBinsDiscretizer` is used to bin the
 continuous target data and encode ordinal labels such that each bin contains
 the same number of data points.
