@@ -54,7 +54,7 @@ To run the notebook demo:
 
 1. Navigate to the notebook located at
 ```sh
-cumulative-link-models/demo/ordinal_regression_via_CLMs.ipynb
+demo/ordinal_regression_via_CLMs.ipynb
 ```
 2. Set the kernel as the conda environment (refer above for instructions)
 3. Run the notebook to create, train, and assess the model
