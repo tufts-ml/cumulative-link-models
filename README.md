@@ -4,7 +4,7 @@
     <img src=res/clm_thumbnail.png height=400>
 </p>
 
-Code for cumulative link models for ordinal regression that support differentiable learning ala TensorFlow and sklearn.
+Code for cumulative link models for ordinal regression that support differentiable learning ala TensorFlow and sklearn outlined in the following paper:
 
 <blockquote>
 <p>
@@ -12,8 +12,12 @@ Code for cumulative link models for ordinal regression that support differentiab
  <br />
 Alexander A. Lobo, Preetish Rath, Micheal C. Hughes
  <br />
-<!-- (35):1019−1041, 2005. -->
+3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH) at International Conference on Machine Learning (ICML)
  <br />
+2023
+ <!-- <br /> -->
+<!-- (35):1019−1041, 2005. -->
+ <!-- <br /> -->
 <!-- PDF available: <a href="https://www.jmlr.org/papers/volume6/chu05a/chu05a.pdf">https://www.jmlr.org/papers/volume6/chu05a/chu05a.pdf</a> -->
 </p>
 </blockquote>
