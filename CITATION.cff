@@ -21,5 +21,9 @@ preferred-citation:
   - family-names: "Hughes"
     given-names: "Michael C."
   title: "Semi-supervised Ordinal Regression via Cumulative Link Models for Predicting In-Hospital Length-of-Stay"
-  booktitle: "Workshop on Interpretable ML in Healthcare at International Conference on Machine Learning (ICML)"
+  collection-title: "Workshop on Interpretable ML in Healthcare at International Conference on Machine Learning (ICML)"
   year: 2023
+  conference:
+  - name: 3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH)
+    location: Online & Ballroom C, Hawaii Convention Center
+    city: Honolulu, HI
