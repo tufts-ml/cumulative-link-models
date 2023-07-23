@@ -38,6 +38,27 @@ conda env create -f environment.yml
 
 ## Demo
 
+### Diabetes Disease Progression Prediction
+
+This demo creates a simple network model in TensorFlow to predict the progression
+of the diabetes.
+
+The [Diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from sklearn is used.
+
+The raw target attribute is a reak valuequantitative measure of the disease 
+progression one year after baseline. A `KBinsDiscretizer` is used to bin the
+continuous target data and encode ordinal labels such that each bin contains
+the same number of data points.
+
+To run the notebook demo:
+
+1. Navigate to the notebook located at
+```sh
+cumulative-link-models/demo/ordinal_regression_via_CLMs.ipynb
+```
+2. Set the kernel as the conda environment (refer above for instructions)
+3. Run the notebook to create, train, and assess the model
+
 ## Experiments
 
 ## Citing
