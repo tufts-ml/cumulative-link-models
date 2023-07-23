@@ -1,5 +1,5 @@
-# cumulative-link-models
-Code for cumulative link models for ordinal regression that support differentiable learning ala TensorFlow.
+# Cumulative Link Models
+Code for cumulative link models for ordinal regression that support differentiable learning ala TensorFlow and sklearn.
 
 <blockquote>
 <p>
@@ -36,13 +36,12 @@ conda env create -f environment.yml
 ## Experiments
 
 ## Citing
-To cite this repository:
+To cite this repository, please cite the published paper:
 ```
-@software{differentialclmsgithub,
-  author = {Alexander A. Lobo, Preetish Rath, Michael C. Hughes},
-  title = {TODO},
-  url = {TODO},
-  version = {TODO},
-  year = {2023},
+@inproceedings{Lobo_Semi-supervised_Ordinal_Regression_2023,
+  author = {Lobo, Alexander A. and Rath, Preetish and Hughes, Michael C.},
+  booktitle = {3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH) at International Conference on Machine Learning (ICML)},
+  title = {{Semi-supervised Ordinal Regression via Cumulative Link Models for Predicting In-Hospital Length-of-Stay}},
+  year = {2023}
 }
 ```
