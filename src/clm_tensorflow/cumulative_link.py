@@ -17,7 +17,7 @@ from tensorflow_probability.python.distributions.ordered_logistic import _broadc
 class CumulativeLink(tfd.Distribution):
     def __init__(
         self,
-        cutpoints: tf.Tensor,
+        padding: tf.Tensor,
         loc: tf.Tensor,
         link: str = 'probit',
         scale: tf.float32 = 1.,
@@ -32,10 +32,11 @@ class CumulativeLink(tfd.Distribution):
 
         Parameters
         ----------
-        cutpoints : `tf.Tensor`
-            A floating-point `Tensor` that is a `C-1`-length vector of cutpoints. 
-            The vector should be non-decreasing, which is only checked 
-            if `validate_args=True`.
+        padding : `tf.Tensor`
+            A floating-point `Tensor` that is a `C-2`-length vector of padding
+            values. Padding determine the separation between cutpoints with 
+            the second cutpoint constrained at 0. The vector should be positive 
+            real values, which is only checked if `validate_args=True`.
         loc : `tf.Tensor`
             A floating-point `Tensor`. The entries represent the
             mean(s) of the latent link distribution(s), which can also be
@@ -66,6 +67,9 @@ class CumulativeLink(tfd.Distribution):
         parameters = dict(locals())
 
         with tf.name_scope(name) as name:
+            
+            # Determine cutpoints from padding, setting first at 0
+            cutpoints = tf.math.cumsum(tf.concat([[0.], padding], axis=-1))
 
             # Cumulative link specific parameters
             float_dtype = dtype_util.common_dtype(
@@ -106,7 +110,7 @@ class CumulativeLink(tfd.Distribution):
         and number of classes `C`."""
         return {
             'loc': tf.convert_to_tensor(sample_shape, dtype=tf.int32),
-            'cutpoints' : tf.convert_to_tensor(num_classes-1),
+            'padding' : tf.convert_to_tensor(num_classes-2),
             'scale': tf.convert_to_tensor(1),
             }
 
@@ -130,7 +134,7 @@ class CumulativeLink(tfd.Distribution):
         """Distribution class argument `link`."""
         return self._link
 
-    def categorical_log_probs(self):
+    def ordinal_log_probs(self):
         """Log probabilities for the `C` ordered class categories."""
         z_values = self._z_values()
         log_cdfs = self.link.log_cdf(z_values)
@@ -205,7 +209,7 @@ class CumulativeLink(tfd.Distribution):
     def _sample_n(self, n, seed=None):
         """Internal method to help generate `n` samples."""
         logits = tf.reshape(
-            self.categorical_log_probs(), [-1, self._num_categories()])
+            self.ordinal_log_probs(), [-1, self._num_categories()])
         draws = samplers.categorical(logits, n, dtype=self.dtype, seed=seed)
         return tf.reshape(
             tf.transpose(draws),
@@ -301,7 +305,7 @@ class CumulativeLink(tfd.Distribution):
 class SimpleCumulativeLink(tfd.OrderedLogistic):
     def __init__(
         self,
-        cutpoints: tf.Tensor,
+        padding: tf.Tensor,
         loc: tf.Tensor,
         link: str = 'probit',
         scale: tf.float32 = 1.,
@@ -310,7 +314,49 @@ class SimpleCumulativeLink(tfd.OrderedLogistic):
         allow_nan_stats: bool = True,
         name: str = 'SimpleCumulativeLink',
     ) -> None:
+        """Initialize Cumulative Link distribution.
+
+        This simplied version of the class inherits from `tfd.OrderedLogistic`,
+        not requiring to rewrite many of the required methods for a `Distribution`
+        class, but overloading some of the methods to suite the CLM implementation.
+
+        `C` : Number of desired ordered classes
+
+        Parameters
+        ----------
+        padding : `tf.Tensor`
+            A floating-point `Tensor` that is a `C-2`-length vector of padding
+            values. Padding determine the separation between cutpoints with 
+            the second cutpoint constrained at 0. The vector should be positive 
+            real values, which is only checked if `validate_args=True`.
+        loc : `tf.Tensor`
+            A floating-point `Tensor`. The entries represent the
+            mean(s) of the latent link distribution(s), which can also be
+            considered the network outputs (or logits).
+        link : `str`, optional
+            Desired link function to use to model the noise of the latent
+            function, by default 'probit'. Must be be either `'probit'`
+            or `'logit'`.
+        scale : `tf.float32`, optional
+            Desired scale (stddev) of the noise applied on the latent function, 
+            by default `1`.
+        dtype : optional
+            The type of the event samples, by default `tf.int32`
+        validate_args : bool, optional
+            When `True` distribution parameters are checked for validity despite
+            possibly degrading runtime performance. When `False` invalid inputs 
+            may silently render incorrect outputs, by default `False`.
+        allow_nan_stats : `bool`, optional
+            When `True`, statistics (e.g. mode) use the value `NaN` to indicate 
+            the result is undefined. When `False`, an exception is raised if 
+            one or more of the statistic's batch members are undefined, 
+            by default True
+        name : str, optional
+            Python `str` name prefixed to Ops created by this class, 
+            by default 'CumulativeLink'
+        """
         with tf.name_scope(name) as name:
+            cutpoints = tf.math.cumsum(tf.concat([[0.], padding], axis=-1))
 
             self._scale = tensor_util.convert_nonref_to_tensor(
                 scale, dtype_hint=tf.float32, name='scale')
