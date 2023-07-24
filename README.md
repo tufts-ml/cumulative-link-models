@@ -60,8 +60,22 @@ To run the notebook demo:
 ```sh
 demo/ordinal_regression_via_CLMs.ipynb
 ```
-2. Set the kernel as the conda environment (refer above for instructions)
+2. Set the kernel as the conda environment (refer above for setup instructions)
 3. Run the notebook to create, train, and assess the model
+
+### Performance Improvement with Cutpoints Learning
+
+This demo shows the comparison of cumulative link model performance with and
+without learning the cutpoints on 2-dimensional toydata.
+
+To run the notebook demo:
+
+1. Navigate to the notebook located at
+```sh
+demo/CLM_cutpoint_training.ipynb
+```
+2. Set the kernel as the conda environment (refer above for setup instructions)
+3. Run the notebook to create, train, and assess the models
 
 ## Experiments
 

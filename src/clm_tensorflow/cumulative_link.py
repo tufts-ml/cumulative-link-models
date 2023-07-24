@@ -17,7 +17,7 @@ from tensorflow_probability.python.distributions.ordered_logistic import _broadc
 class CumulativeLink(tfd.Distribution):
     def __init__(
         self,
-        padding: tf.Tensor,
+        cutpoints: tf.Tensor,
         loc: tf.Tensor,
         link: str = 'probit',
         scale: tf.float32 = 1.,
@@ -69,7 +69,7 @@ class CumulativeLink(tfd.Distribution):
         with tf.name_scope(name) as name:
             
             # Determine cutpoints from padding, setting first at 0
-            cutpoints = tf.math.cumsum(tf.concat([[0.], padding], axis=-1))
+            # cutpoints = tf.math.cumsum(tf.concat([[0.], padding], axis=-1))
 
             # Cumulative link specific parameters
             float_dtype = dtype_util.common_dtype(
@@ -134,15 +134,15 @@ class CumulativeLink(tfd.Distribution):
         """Distribution class argument `link`."""
         return self._link
 
-    def ordinal_log_probs(self):
+    def categorical_log_probs(self):
         """Log probabilities for the `C` ordered class categories."""
         z_values = self._z_values()
         log_cdfs = self.link.log_cdf(z_values)
         return tfp_math.log_sub_exp(log_cdfs[..., :-1], log_cdfs[..., 1:])
 
-    def ordinal_probs(self):
+    def categorical_probs(self):
         """Probabilities for the `C` ordered class categories."""
-        return tf.math.exp(self.ordinal_log_probs())
+        return tf.math.exp(self.categorical_log_probs())
     
     def _z_values(self, eps=1e-8) -> tf.Tensor:
         """`z` values used to compute CDFs for smoother likelihood.
@@ -209,7 +209,7 @@ class CumulativeLink(tfd.Distribution):
     def _sample_n(self, n, seed=None):
         """Internal method to help generate `n` samples."""
         logits = tf.reshape(
-            self.ordinal_log_probs(), [-1, self._num_categories()])
+            self.categorical_log_probs(), [-1, self._num_categories()])
         draws = samplers.categorical(logits, n, dtype=self.dtype, seed=seed)
         return tf.reshape(
             tf.transpose(draws),
