@@ -1,7 +1,7 @@
 # Cumulative Link Models
 
 <p align=center>
-    <img src=res/clm_thumbnail.png height=400>
+    <img src=res/clm_thumbnail.png width=100%>
 </p>
 
 Code for cumulative link models for ordinal regression that support differentiable learning ala TensorFlow and sklearn outlined in the following paper:
@@ -15,14 +15,12 @@ Alexander A. Lobo, Preetish Rath, Micheal C. Hughes
 3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH) at International Conference on Machine Learning (ICML)
  <br />
 2023
- <!-- <br /> -->
-<!-- (35):1019−1041, 2005. -->
- <!-- <br /> -->
-<!-- PDF available: <a href="https://www.jmlr.org/papers/volume6/chu05a/chu05a.pdf">https://www.jmlr.org/papers/volume6/chu05a/chu05a.pdf</a> -->
+ <br />
+PDF available: <a href="https://openreview.net/forum?id=pDDKtCklZy">https://openreview.net/forum?id=pDDKtCklZy</a>
 </p>
 </blockquote>
 
-To appear at [IMLH 2023](https://sites.google.com/view/imlh2023/home?authuser=1).
+Appeared at [IMLH 2023](https://sites.google.com/view/imlh2023/home?authuser=1).
 
 ## Contents
 1. [Setup](#setup)
@@ -46,6 +44,10 @@ conda env create -f environment.yml
 
 This demo creates a simple network model in TensorFlow to predict the progression
 of the diabetes.
+
+<p align=center>
+    <img src=res/tensorflow_clm_model.png width=50%>
+</p>
 
 The [Diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from sklearn is used.
 
@@ -82,10 +84,11 @@ demo/CLM_cutpoint_training.ipynb
 ## Citing
 To cite this repository, please cite the published paper:
 ```
-@inproceedings{Lobo_Semi-supervised_Ordinal_Regression_2023,
-  author = {Lobo, Alexander A. and Rath, Preetish and Hughes, Michael C.},
-  booktitle = {3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH) at International Conference on Machine Learning (ICML)},
-  title = {{Semi-supervised Ordinal Regression via Cumulative Link Models for Predicting In-Hospital Length-of-Stay}},
-  year = {2023}
+@inproceedings{lobo2023semisupervised,
+title={Semi-supervised Ordinal Regression via Cumulative Link Models for Predicting In-Hospital Length-of-Stay},
+author={Alexander Arjun Lobo and Preetish Rath and Michael C Hughes},
+booktitle={ICML 3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH) },
+year={2023},
+url={https://openreview.net/forum?id=pDDKtCklZy}
 }
 ```
