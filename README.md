@@ -46,7 +46,7 @@ This demo creates a simple network model in TensorFlow to predict the progressio
 of the diabetes.
 
 <p align=center>
-    <img src=res/tensorflow_clm_model.png width=50%>
+    <img src=res/tensorflow_clm_model.png width=75%>
 </p>
 
 The [Diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from sklearn is used.
