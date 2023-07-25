@@ -10,7 +10,7 @@ authors:
 title: "Cumulative Link Models"
 version: 1.0.0
 date-released: 2023-07-28
-url: "https://github.com/tufts-ml/cumulative-link-models/tree/main"
+url: "https://github.com/tufts-ml/cumulative-link-models"
 preferred-citation:
   type: conference-paper
   authors:
@@ -21,5 +21,6 @@ preferred-citation:
   - family-names: "Hughes"
     given-names: "Michael C."
   title: "Semi-supervised Ordinal Regression via Cumulative Link Models for Predicting In-Hospital Length-of-Stay"
-  collection-title: "3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH) at International Conference on Machine Learning (ICML)"
+  collection-title: "ICML 3rd Workshop on Interpretable Machine Learning in Healthcare (IMLH)"
   year: 2023
+  url: "https://openreview.net/forum?id=pDDKtCklZy"
