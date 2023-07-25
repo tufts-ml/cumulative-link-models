@@ -2,6 +2,7 @@
 
 <p align=center>
     <img src=res/clm_thumbnail.png width=100%>
+    <figcaption><b><i>Fig. 1:</i></b> Cumulative link model likelihood depictions with different link functions and scale parameters.</figcaption>
 </p>
 
 Code for cumulative link models for ordinal regression that support differentiable learning ala TensorFlow and sklearn outlined in the following paper:
