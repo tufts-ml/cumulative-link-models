@@ -47,6 +47,7 @@ of the diabetes.
 
 <p align=center>
     <img src=res/tensorflow_clm_model.png width=75%>
+    <figcaption><b><i>Fig. 2:</i></b> Simple CLM network model representation used to predict diabetes ordinal progression category.</figcaption>
 </p>
 
 The [Diabetes dataset](https://scikit-learn.org/stable/datasets/toy_dataset.html#diabetes-dataset) from sklearn is used.
