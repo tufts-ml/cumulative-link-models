@@ -44,7 +44,7 @@ conda env create -f environment.yml
 ### Diabetes Disease Progression Prediction
 
 This demo creates a simple network model in TensorFlow to predict the progression
-of the diabetes.
+of diabetes amongst patients.
 
 <p align=center>
     <img src=res/tensorflow_clm_model.png width=75%>
