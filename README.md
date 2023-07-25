@@ -39,6 +39,11 @@ Follow the instructions here: https://conda.io/projects/conda/en/latest/user-gui
 conda env create -f environment.yml
 ```
 
+### Activate environement
+```sh
+conda activate clm
+```
+
 ## Demo
 
 ### Diabetes Disease Progression Prediction
