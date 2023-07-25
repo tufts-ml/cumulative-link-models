@@ -64,7 +64,7 @@ To run the notebook demo:
 ```sh
 demo/ordinal_regression_via_CLMs.ipynb
 ```
-2. Set the kernel as the conda environment (refer above for setup instructions)
+2. Set the kernel as the conda environment (refer to [Setup](#setup) above for instructions)
 3. Run the notebook to create, train, and assess the model
 
 ### Performance Improvement with Cutpoints Learning
@@ -78,7 +78,7 @@ To run the notebook demo:
 ```sh
 demo/CLM_cutpoint_training.ipynb
 ```
-2. Set the kernel as the conda environment (refer above for setup instructions)
+2. Set the kernel as the conda environment (refer to [Setup](#setup) above for instructions)
 3. Run the notebook to create, train, and assess the models
 
 ## Experiments
