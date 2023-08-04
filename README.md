@@ -28,7 +28,7 @@ Appeared at [IMLH 2023](https://sites.google.com/view/imlh2023/home?authuser=1).
 2. [Demo](#demo)
 3. [Experiments](#experiments)
 4. [Testing] (#testing)
-5. [Future Development] (#futuredevelopment)
+5. [Future Development] (#future-development)
 4. [Citing](#citing)
 
 ## Setup
