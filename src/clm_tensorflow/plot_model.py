@@ -9,7 +9,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 
 
-def plot_model(model: tf.keras.Model, X: np.ndarray, y: np.ndarray, export_path=None):
+def plot_model(model: tf.keras.Model, X: np.ndarray, y: np.ndarray, pad=1, export_path=None):
     """Function to plot the decision boundaries given a model.
 
     Parameters
@@ -20,6 +20,8 @@ def plot_model(model: tf.keras.Model, X: np.ndarray, y: np.ndarray, export_path=
         Feature data, must be 2D
     y : np.ndarray-like
         Data labels
+    pad : float
+        The margin between the data and the axes
     export_path : pathlib.Path-like
         Path of desired export
 
@@ -39,7 +41,6 @@ def plot_model(model: tf.keras.Model, X: np.ndarray, y: np.ndarray, export_path=
     x1 = X[:, 1]
 
     # Set the limits on x/y-axis close to the data
-    pad = 1
     x0_lims = [x0.min()-pad, x0.max()+pad]
     x1_lims = [x1.min()-pad, x1.max()+pad]
 
@@ -76,8 +77,8 @@ def plot_model(model: tf.keras.Model, X: np.ndarray, y: np.ndarray, export_path=
 
     # Set up the figure, axis, and colorbar location
     f, axs = plt.subplots(1, 1, figsize=(5, 5))
-    divider = make_axes_locatable(axs)
-    cax = divider.append_axes('right', size='5%', pad=0.2)
+    # divider = make_axes_locatable(axs)
+    # cax = divider.append_axes('right', size='5%', pad=0.2)
     # cax0 = divider.append_axes('right', size='5%', pad=0.2)
     # cax1 = divider.append_axes('right', size='5%', pad=0.3)
     # cax2 = divider.append_axes('right', size='5%', pad=0.4)
@@ -113,8 +114,8 @@ def plot_model(model: tf.keras.Model, X: np.ndarray, y: np.ndarray, export_path=
             vmin=0.0, vmax=1.0)
 
     # Create the color bar -- Generalized to be grey
-    cbar = plt.colorbar(plt.cm.ScalarMappable(
-        cmap=grey_cmap), cax=cax, ticks=[0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    # cbar = plt.colorbar(plt.cm.ScalarMappable(
+    #     cmap=grey_cmap), cax=cax, ticks=[0, 0.2, 0.4, 0.6, 0.8, 1.0])
     # cbar0 = plt.colorbar(im0, cax=cax0, ticks=[0, 0.2, 0.4, 0.6, 0.8, 1.0])
     # cbar1 = plt.colorbar(im1, cax=cax1, ticks=[0, 0.2, 0.4, 0.6, 0.8, 1.0])
     # cbar2 = plt.colorbar(im2, cax=cax2, ticks=[0, 0.2, 0.4, 0.6, 0.8, 1.0])
@@ -125,10 +126,11 @@ def plot_model(model: tf.keras.Model, X: np.ndarray, y: np.ndarray, export_path=
     # cbar3.draw_all()
 
     # Include legend
-    # handles, labels = axs.get_legend_handles_labels()
-    # axs.legend(handles[::-1], labels[::-1],
-    #            bbox_to_anchor=(1.04, 1), borderaxespad=0)
+    handles, labels = axs.get_legend_handles_labels()
+    axs.legend(handles[::-1], labels[::-1])
     # axs.legend()
+
+    # Export
     if export_path is not None:
         plt.savefig(export_path,
                     bbox_inches='tight', pad_inches=0)
