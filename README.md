@@ -67,7 +67,7 @@ To run the notebook demo:
 
 1. Navigate to the notebook located at
 ```sh
-demo/ordinal_regression_via_CLMs.ipynb
+demo/diabetes_prediction_via_CLMs_tensorflow.ipynb
 ```
 2. Set the kernel as the conda environment (refer to [Setup](#setup) above for instructions)
 3. Run the notebook to create, train, and assess the model
@@ -82,6 +82,19 @@ To run the notebook demo:
 1. Navigate to the notebook located at
 ```sh
 demo/CLM_cutpoint_training.ipynb
+```
+2. Set the kernel as the conda environment (refer to [Setup](#setup) above for instructions)
+3. Run the notebook to create, train, and assess the models
+
+### Simple CLM Model Training in sklearn
+
+This demo showcases how to train a CLM model for ordinal regression using sklearn.
+
+To run the notebook demo:
+
+1. Navigate to the notebook located at
+```sh
+demo/ordinal_regression_via_CLMs_sklearn.ipynb
 ```
 2. Set the kernel as the conda environment (refer to [Setup](#setup) above for instructions)
 3. Run the notebook to create, train, and assess the models
