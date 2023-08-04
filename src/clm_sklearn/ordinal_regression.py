@@ -47,6 +47,7 @@ from scipy.optimize import minimize
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.linear_model._base import LinearClassifierMixin
 
 import imageio
 
@@ -57,15 +58,17 @@ from typing import Tuple, List
 ################################################################################
 
 
-class OrdinalRegression(BaseEstimator, ClassifierMixin):
+class OrdinalRegression(BaseEstimator, LinearClassifierMixin):
     """Class to fit and predict ordinal outcomes."""
 
     def __init__(self,
                  noise_stdev: float = 1,
                  C: float = 0,
-                 save_loss: bool = False,
-                 log_training: bool = False,
+                #  save_loss: bool = False,
+                #  log_training: bool = False,
                  random_state: int = None,
+                #  directory = None,
+                #  log_file = None,
                  ) -> None:
         """Constructor for OrdinalRegression class.
 
@@ -80,35 +83,41 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
             Whether to save the save the loss progression as training occurs
         random_state : int, optional
             Seed to set random state if desired, by default None
-
+        directory : path-like or string
+            Optional argument to specify export path directory, by default None 
+            (current working directory)
+        log_file : path-like or string
+            Optional argument to specify export path of log file, by default None
+        
         Returns
         -------
         None
-
-        TODO
-        ----
         """
         # Parameters
-        self.w = None
         self.noise_stdev = noise_stdev
         self.C = C
 
         # Random State
-        self.rs = ag_np.random.RandomState(random_state)
+        self.random_state = random_state
 
         # File path(s)
         # self.directory = pathlib.Path(__file__).parent
-        self.directory = pathlib.Path.cwd()
+        # if directory is None:
+        #     self.directory = pathlib.Path.cwd()
 
         # Logging
-        self.save_loss = save_loss
-        if log_training:
-            self.directory.joinpath('logging').mkdir(exist_ok=True)
-            self.log_file = self.directory.joinpath('logging', 'log.txt')
-            self.log_file.touch()
-        else:
-            self.log_file = None
+        # self.save_loss = save_loss
+        # if log_training:
+        #     self.directory.joinpath('logging').mkdir(exist_ok=True)
+        #     self.log_file = self.directory.joinpath('logging', 'log.txt')
+        #     self.log_file.touch()
+        # else:
+        #     self.log_file = None
         return None
+    
+    def get_params(self, deep=True) -> dict:
+        """Class getter."""
+        return {"noise_stdev": self.noise_stdev, "C": self.C, "random_state": self.random_state}
 
     def set_params(self, **kwargs) -> None:
         """Class method to manually set parameters if desired.
@@ -156,13 +165,13 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         """
         # Relevant parameters
         N, M = X.shape
-        R = y.max()+1
+        R = int(y.max()+1)
 
         # Transform
         # * Adds ones feature column to X for bias weight
         X_transformed = self._transform(X)
-        self.X = X
-        self.y = y
+        self.X_ = X
+        self.y_ = y
 
         # Cutpoints
         # ordinal_outcomes = set(range(y.max()+1))
@@ -188,7 +197,7 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
 
         # Weights
         # TODO: can't remember how to initialize weights differently (if needed)
-        init_w = self.rs.normal(size=M+1)
+        init_w = ag_np.random.RandomState(self.random_state).normal(size=M+1)
 
         # Cutpoints
         init_cut_points = ag_np.linspace(-3, 3, num=R-1)
@@ -200,31 +209,31 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
 
         # Log
         # TODO: consider appending logs to list and printing all at once
-        if self.log_file is not None:
-            with open(self.log_file, 'a') as f:
-                if fit_noise_stdev is not None:
-                    message = f'Trained stdev = {fit_noise_stdev}'
-                    pad = '='
-                    print(f'{message:{pad}^8}', file=f)
-                print('INIT weights:', file=f)
-                print(init_w, file=f)
-                print('INIT cutpoints:', file=f)
-                print(init_cut_points, file=f)
-                print('INIT deltas:', file=f)
-                print(ag_np.diff(init_cut_points), file=f)
-                print('INIT epsilons:', file=f)
-                print(init_epsilons, file=f)
-                print('INIT PARAMS:', file=f)
-                print(init_params, file=f)
+        # if self.log_file is not None:
+        #     with open(self.log_file, 'a') as f:
+        #         if fit_noise_stdev is not None:
+        #             message = f'Trained stdev = {fit_noise_stdev}'
+        #             pad = '='
+        #             print(f'{message:{pad}^8}', file=f)
+        #         print('INIT weights:', file=f)
+        #         print(init_w, file=f)
+        #         print('INIT cutpoints:', file=f)
+        #         print(init_cut_points, file=f)
+        #         print('INIT deltas:', file=f)
+        #         print(ag_np.diff(init_cut_points), file=f)
+        #         print('INIT epsilons:', file=f)
+        #         print(init_epsilons, file=f)
+        #         print('INIT PARAMS:', file=f)
+        #         print(init_params, file=f)
 
         # MLE Estimate
         # Set up loss function
         def loss_function(params):
             # Log
-            if self.log_file is not None:
-                with open(self.log_file, 'a') as f:
-                    print('PARAMS:', file=f)
-                    print(params, file=f)
+            # if self.log_file is not None:
+            #     with open(self.log_file, 'a') as f:
+            #         print('PARAMS:', file=f)
+            #         print(params, file=f)
             # Stdev
             # FIXME: for some reason, trying to learn sigma is leading to NaNs
             if fit_noise_stdev is not None:
@@ -264,52 +273,52 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         # Callback function to produce Neg log likelihood log file
         def callbackF(xk):
             # print(xk)
-            with open(self.directory.joinpath('neg_log_likelihood.csv'), 'a') as f:
-                print(f'{self.Nfeval},{loss_function(xk)/N}', file=f)
+            # with open(self.directory.joinpath('neg_log_likelihood.csv'), 'a') as f:
+                # print(f'{self.Nfeval},{loss_function(xk)/N}', file=f)
             self.Nfeval += 1
 
         # Use scipy.minimize to find global minimum and return parameters
         # Save negative log loss plot as csv and plot if desired
-        if self.save_loss == True and fit_noise_stdev is None:
-            self.Nfeval = 1
-            # Create log file
-            with open(self.directory.joinpath('neg_log_likelihood.csv'), 'w') as f:
-                print('Iter,Neg_Log_Likelihood_per_sample', file=f)
-            params = minimize(
-                fun=value_and_grad(loss_function),
-                x0=init_params,
-                jac=True,
-                method='L-BFGS-B',
-                callback=callbackF,
-            ).x
+        # if self.save_loss == True and fit_noise_stdev is None:
+        #     self.Nfeval = 1
+        #     # Create log file
+        #     with open(self.directory.joinpath('neg_log_likelihood.csv'), 'w') as f:
+        #         print('Iter,Neg_Log_Likelihood_per_sample', file=f)
+        #     params = minimize(
+        #         fun=value_and_grad(loss_function),
+        #         x0=init_params,
+        #         jac=True,
+        #         method='L-BFGS-B',
+        #         callback=callbackF,
+        #     ).x
 
-            # Plot the neg log likelihood over time
-            self._plot_log_likelihood()
-        else:
-            params = minimize(
-                fun=value_and_grad(loss_function),
-                x0=init_params,
-                jac=True,
-                method='L-BFGS-B',
-            ).x
-        self.noise_stdev = softplus(params[0])
+        #     # Plot the neg log likelihood over time
+        #     self._plot_log_likelihood()
+        # else:
+        params = minimize(
+            fun=value_and_grad(loss_function),
+            x0=init_params,
+            jac=True,
+            method='L-BFGS-B',
+        ).x
+        self.noise_stdev_ = softplus(params[0])
         deltas = softplus(params[2:R])  # 2+R-2 = R
-        self.b = ag_np.cumsum(ag_np.hstack((params[1], deltas)))
-        self.w = params[R:]
+        self.b_ = ag_np.cumsum(ag_np.hstack((params[1], deltas)))
+        self.coef_ = params[R:][ag_np.newaxis, ...]
 
         # Log best values
-        if self.log_file is not None:
-            with open(self.log_file, 'a') as f:
-                print('BEST noise:')
-                print(self.noise_stdev)
-                print('BEST deltas:')
-                print(deltas)
-                print('BEST cutpoints:')
-                print(self.b)
-                print('BEST weights:')
-                print(self.w)
+        # if self.log_file is not None:
+        #     with open(self.log_file, 'a') as f:
+        #         print('BEST noise:')
+        #         print(self.noise_stdev)
+        #         print('BEST deltas:')
+        #         print(deltas)
+        #         print('BEST cutpoints:')
+        #         print(self.b)
+        #         print('BEST weights:')
+        #         print(self.w)
 
-        return None
+        return self
 
     def _transform(self, X: ag_np.ndarray) -> ag_np.ndarray:
         """Transform the data.
@@ -362,7 +371,7 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         """
         X_transformed = self._transform(X)
         best_log_proba_NR = self.log_proba(
-            self.noise_stdev, self.w, self.b, X_transformed)
+            self.noise_stdev_, self.coef_, self.b_, X_transformed)
         y_predict = ag_np.argmax(best_log_proba_NR, axis=1)
         return y_predict
 
@@ -465,7 +474,7 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         R = b.size - 1
 
         # Compute latent function output and tile to create NR shape
-        f_x_N = X @ w
+        f_x_N = X @ w.squeeze()
         f_x_NR = ag_np.tile(f_x_N[:, ag_np.newaxis], (1, R))
 
         # Isolate cutpoints for z_1 and z_2 calcs
@@ -534,7 +543,7 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         # Compute latent function output and tile to create NR shape
         # z_matrix_NR_1 = ag_np.zeros((N, 0))
         # z_matrix_NR_2 = ag_np.zeros((N, 0))
-        f_x_N = X @ w
+        f_x_N = X @ w.squeeze()
         f_x_NR = ag_np.tile(f_x_N[:, ag_np.newaxis], (1, R))
 
         # stdev = ag_np.array(stdev)
@@ -577,7 +586,7 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
             _description_
         """
         X_transformed = self._transform(X)
-        return self.proba(self.noise_stdev, self.w, self.b, X_transformed)
+        return self.proba(self.noise_stdev_, self.coef_, self.b_, X_transformed)
 
     def predict_log_proba(self, X: ag_np.ndarray) -> ag_np.ndarray:
         """Obtain the log-probabilities of each ordinal outcome given the best
@@ -594,7 +603,7 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
             _description_
         """
         X_transformed = self._transform(X)
-        return self.log_proba(self.noise_stdev, self.w, self.b, X_transformed)
+        return self.log_proba(self.noise_stdev_, self.coef_, self.b_, X_transformed)
     
     def score(self, X: ag_np.ndarray, y: ag_np.ndarray) -> float:
         """Compute the accuracy of the predictions"""
@@ -625,7 +634,7 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
             'Ordinal Regression Log-Likelihood Change with Gradient Descent (L-BFGS-B)')
         ax.grid(True)
         plt.savefig(self.directory.joinpath('neg_log_likelihood.png'),
-                    bbox_inches='tight', pad_inches=0)
+                        bbox_inches='tight', pad_inches=0)
 
     def grid_search_stdev(self, out_dir: pathlib.Path = None, iteration: int = None) -> Tuple[float, float]:
         """Given the current best parameters obtained from optimization,
@@ -646,8 +655,8 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
             out_dir = self.directory
 
         # Training data
-        X = self.X
-        y = self.y
+        X = self.X_
+        y = self.y_
         X_transformed = self._transform(X)
 
         # Relevant parameters
@@ -655,8 +664,8 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         R = y.max()+1
 
         # Define a constrain and inverse constrain params functions
-        best_b = self.b
-        best_w = self.w
+        best_b = self.b_
+        best_w = self.coef_
 
         b1 = best_b[0]
         deltas = ag_np.diff(best_b)
@@ -709,14 +718,14 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         ax.set_xlabel('Noise stdev')
         ax.set_ylabel('Computed loss')
         ax.set_title(
-            f'Loss at various noise stdevs\nTrained stdev = {self.noise_stdev:.3f}')
+            f'Loss at various noise stdevs\nTrained stdev = {self.noise_stdev_:.3f}')
         ax.grid(True)
 
         filename = f'trained_stdev.png'
         if iteration is not None:
             filename = f'{iteration:03d}_' + filename
         else:
-            filename = f'{self.noise_stdev:.3f}_' + filename
+            filename = f'{self.noise_stdev_:.3f}_' + filename
         plt.savefig(out_dir.joinpath('loss_stdev', filename),
                     bbox_inches='tight', pad_inches=0)
         plt.close(fig)
@@ -755,9 +764,9 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
         for i in range(iter):
             min_stdev, _ = self.grid_search_stdev(
                 out_dir=out_dir, iteration=i)
-            self.fit(self.X, self.y, fit_noise_stdev=min_stdev)
+            self.fit(self.X_, self.y_, fit_noise_stdev=min_stdev)
             print(f'CUTPOINTS after iteration {i}:')
-            print(self.b)
+            print(self.b_)
 
         # Generate animation to show loss curve and minimum changes
         frames = []
@@ -782,6 +791,9 @@ class OrdinalRegression(BaseEstimator, ClassifierMixin):
                         )
         return min_stdev
 
+################################################################################
+# Module Functions
+################################################################################
 
 def softplus(x: ag_np.ndarray) -> ag_np.ndarray:
     """Implements the softplus activation function to constrain values.
@@ -821,11 +833,6 @@ def softplus(x: ag_np.ndarray) -> ag_np.ndarray:
     # ag_np.log1p(ag_np.exp(-ag_np.abs(x))) + ag_np.maximum(x, 0)
     # out_N = mask0_N * ag_np.log1p(ag_np.exp(x)) + mask1_N * (ag_np.log1p(ag_np.exp(-x))+x)
     return ag_np.log1p(ag_np.exp(-ag_np.abs(x))) + ag_np.maximum(x, 0)
-
-
-################################################################################
-# Module Functions
-################################################################################
 
 def softplus_inv(x: ag_np.ndarray) -> ag_np.ndarray:
     """Inverse softplus function.
@@ -870,7 +877,7 @@ def constrain_inv(*params) -> Tuple[ag_np.array]:
     return tuple(map(softplus_inv, params))
 
 
-def plot_model(model, export_path=None):
+def plot_model(model, pad=1, export_path=None):
     """Function to plot the decision boundaries given a model.
 
     Parameters
@@ -890,12 +897,11 @@ def plot_model(model, export_path=None):
     * Plot decision boundaries using contours
     """
     # Obtain Training data
-    y = model.y
-    x0 = model.X[:, 0]
-    x1 = model.X[:, 1]
+    y = model.y_
+    x0 = model.X_[:, 0]
+    x1 = model.X_[:, 1]
 
     # Set the limits on x/y-axis close to the data
-    pad = 1
     x0_lims = [x0.min()-pad, x0.max()+pad]
     x1_lims = [x1.min()-pad, x1.max()+pad]
 
@@ -1051,10 +1057,11 @@ def plot_model(model, export_path=None):
     # cbar3.draw_all()
 
     # Include legend
-    # handles, labels = axs.get_legend_handles_labels()
-    # axs.legend(handles[::-1], labels[::-1],
-    #            bbox_to_anchor=(1.04, 1), borderaxespad=0)
+    handles, labels = axs.get_legend_handles_labels()
+    axs.legend(handles[::-1], labels[::-1])
     # axs.legend()
+
+    # Export
     if export_path is not None:
         plt.savefig(export_path,
                     bbox_inches='tight', pad_inches=0)
