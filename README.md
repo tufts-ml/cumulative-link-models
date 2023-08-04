@@ -27,6 +27,8 @@ Appeared at [IMLH 2023](https://sites.google.com/view/imlh2023/home?authuser=1).
 1. [Setup](#setup)
 2. [Demo](#demo)
 3. [Experiments](#experiments)
+4. [Testing] (#testing)
+5. [Future Development] (#futuredevelopment)
 4. [Citing](#citing)
 
 ## Setup
@@ -100,6 +102,30 @@ demo/ordinal_regression_via_CLMs_sklearn.ipynb
 3. Run the notebook to create, train, and assess the models
 
 ## Experiments
+
+## Testing
+
+Run the following command to conduct unit testing:
+
+```sh
+pytest
+```
+
+## Future Development
+
+This repo provides the CLM model for the following packages:
+- TensorFlow (tensorflow-probability==0.11.0)
+- scikit-learn (sklearn)
+
+We recognize and apologize that the current tensorflow-probability implementation
+of the class is technically deprecated. However, we encourage users to contribute
+and refactor the code to work with newer versions of tensorflow-probability! 
+
+We are planning future development for the following packages as well:
+- PyTorch
+- JAX
+
+Please stay tuned!
 
 ## Citing
 To cite this repository, please cite the published paper:
